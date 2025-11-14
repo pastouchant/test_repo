@@ -244,8 +244,8 @@ class DataPipeline:
         Returns:
             Resampled DataFrame
         """
-        # OHLCV resampling rules
-        resample_rules = {
+        # OHLCV resampling rules (only include if columns exist)
+        base_resample_rules = {
             'open': 'first',
             'high': 'max',
             'low': 'min',
@@ -253,7 +253,10 @@ class DataPipeline:
             'volume': 'sum'
         }
 
-        # Additional fields (sum for delta, last for others)
+        # Only use rules for columns that actually exist in the DataFrame
+        resample_rules = {col: rule for col, rule in base_resample_rules.items() if col in df.columns}
+
+        # Additional fields (sum for delta/volume, last for others)
         additional_rules = {}
         for col in df.columns:
             if col not in resample_rules:
