@@ -27,6 +27,7 @@ seaborn>=0.12.0
 # Utilities
 python-dateutil>=2.8.0
 pytz>=2023.3
+pyarrow>=14.0.0  # Required for parquet caching
 
 # Development (optional)
 jupyter>=1.0.0
