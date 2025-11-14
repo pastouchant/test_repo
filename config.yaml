@@ -1,0 +1,187 @@
+# =============================================================================
+# BTCUSDT Perpetual Edge Discovery System - Phase 1 Configuration
+# =============================================================================
+
+# Market & Symbol Configuration
+market:
+  symbol: "BTCUSDT"
+  asset_type: "perpetual"  # Perpetual futures
+  venue: "bybit"
+  base_currency: "BTC"
+  quote_currency: "USDT"
+
+# Timeframe Configuration
+timeframes:
+  primary: "5m"  # Primary analysis timeframe
+  secondary: ["1m", "15m", "1h", "4h"]  # Supporting timeframes
+  resample_from: "1m"  # Fetch 1m data and resample up
+
+# Backtesting Window
+backtest:
+  start_date: "2023-01-01"  # Start of backtest period
+  end_date: "2024-12-31"    # End of backtest period
+  train_test_split: 0.7      # 70% train, 30% test
+  walk_forward_periods: 6    # Number of walk-forward windows
+  min_bars_required: 1000    # Minimum bars for valid backtest
+
+# Cost Model (Bybit Europe)
+costs:
+  maker_fee: 0.0002   # 0.02% (2 bps)
+  taker_fee: 0.0006   # 0.06% (6 bps)
+  slippage_bps: 2     # 2 bps average slippage
+
+  # Funding rate (applied every 8 hours)
+  funding_frequency_hours: 8
+  avg_funding_rate: 0.0001  # 0.01% per 8h (indicative)
+  use_actual_funding: true  # Use historical funding if available
+
+# Risk & Position Sizing
+risk:
+  default_risk_per_trade_pct: 1.0  # 1% of equity per trade
+  max_leverage: 5.0
+  max_daily_loss_pct: 5.0         # Stop trading if down 5% in a day
+  max_concurrent_positions: 1      # Single position at a time (Phase 1)
+  min_position_size_usd: 10.0
+  initial_capital_usd: 10000.0
+
+# Data Sources
+data:
+  # Primary source (free/cheap OHLCV)
+  primary_source: "ccxt"  # or "bybit_api"
+
+  # Optional paid source for orderflow data (CVD, OI, etc.)
+  orderflow_source: "tardis"  # or "databento", "none"
+
+  # Monthly budget: $30
+  max_monthly_cost: 30
+
+  # Cache settings
+  cache_dir: "./data/cache"
+  use_cache: true
+  cache_expiry_days: 7
+
+  # Required fields
+  required_fields:
+    - "open"
+    - "high"
+    - "low"
+    - "close"
+    - "volume"
+    - "cvd"          # Cumulative Volume Delta
+    - "delta"        # Per-bar delta
+    - "oi"           # Open Interest
+    - "funding_rate"
+
+# Optimization Settings
+optimization:
+  # Target metrics
+  primary_metric: "profit_factor"
+  min_profit_factor: 1.5          # Minimum PF to consider strategy viable
+  min_trades_per_week: 15         # Target minimum
+  max_trades_per_week: 30         # Avoid overtrading
+  min_sharpe: 0.5                 # Minimum Sharpe ratio
+  max_drawdown_pct: 20.0          # Maximum acceptable drawdown
+
+  # Optimization methods
+  methods:
+    - "grid_search"
+    - "random_search"
+    - "bayesian"
+
+  default_method: "bayesian"
+  max_iterations: 200             # For Bayesian/Random
+  n_jobs: -1                       # Parallel jobs (-1 = all cores)
+
+  # Walk-forward validation
+  use_walk_forward: true
+  anchored: false                  # Rolling window (not anchored)
+
+# Machine Learning Settings
+ml:
+  # Model types to try
+  models:
+    - "logistic_regression"
+    - "xgboost"
+    - "lightgbm"
+
+  # Cross-validation
+  cv_folds: 5
+  purge_window: 10  # Bars to purge between folds (prevent leakage)
+
+  # Feature engineering
+  max_features: 50
+  feature_selection: "importance"  # or "all"
+
+  # Training
+  test_size: 0.3
+  validation_size: 0.2
+  random_state: 42
+
+  # Threshold optimization
+  optimize_threshold: true
+  threshold_metric: "f1"  # or "precision", "recall"
+
+  # Model persistence
+  save_models: true
+  model_dir: "./models"
+
+# Edge Discovery & Pruning
+edge_discovery:
+  # Statistical significance
+  min_sample_size: 30              # Minimum trades for statistical validity
+  confidence_level: 0.95
+
+  # Robustness checks
+  test_across_regimes: true        # Test in bull/bear/sideways
+  test_across_sessions: true       # Test across Asia/London/NY
+
+  # Pruning criteria (strategies failing these are discarded)
+  prune_if:
+    profit_factor_below: 1.2
+    sharpe_below: 0.3
+    trades_below: 20               # Total trades in backtest
+    win_rate_below: 0.35
+    payoff_ratio_below: 1.0        # Avg win / Avg loss
+
+  # Promotion criteria (strategies passing these are "approved")
+  approve_if:
+    profit_factor_above: 1.8
+    sharpe_above: 1.0
+    trades_above: 50
+    max_drawdown_below: 15.0
+    stable_across_periods: true    # Consistent performance across walk-forward
+
+# Output Settings
+output:
+  results_dir: "./results"
+  trade_logs_dir: "./results/trade_logs"
+  equity_curves_dir: "./results/equity_curves"
+  reports_dir: "./results/reports"
+
+  # Report formats
+  generate_html_report: true
+  generate_pdf_report: false
+
+  # Visualization
+  plot_equity_curves: true
+  plot_drawdowns: true
+  plot_trade_distribution: true
+  plot_feature_importance: true
+
+  # Approved strategies
+  approved_strategies_file: "./results/approved_strategies.json"
+  edgeless_strategies_file: "./results/edgeless_strategies.json"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "./logs/phase1.log"
+  console_output: true
+
+# Development & Debug
+debug:
+  fast_mode: false           # Use subset of data for quick testing
+  fast_mode_days: 30         # Use only last 30 days in fast mode
+  verbose_backtest: false    # Print every trade
+  save_intermediate: true    # Save intermediate results
+  plot_every_strategy: false # Plot equity curve for every strategy tested
