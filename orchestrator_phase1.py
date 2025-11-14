@@ -35,7 +35,8 @@ from metrics import PerformanceMetrics
 from optimizer import StrategyOptimizer
 from ml_models import TradeFilterModel
 
-# Setup logging
+# Setup logging (create logs directory first)
+Path('logs').mkdir(parents=True, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
