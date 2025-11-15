@@ -303,7 +303,7 @@ def get_monday_range_sweep_spec() -> TradeSpec:
         exit_logic=ExitLogic(
             stop_loss_rules=[
                 ExitRule("Beyond sweep wick", "sl",
-                        "sweep_wick_high if side == 'long' else sweep_wick_low", priority=1)
+                        "high if side == 'long' else low", priority=1)
             ],
             take_profit_rules=[
                 ExitRule("Opposite end of Monday range", "tp",
@@ -365,7 +365,7 @@ def get_asia_liquidity_trap_spec() -> TradeSpec:
         exit_logic=ExitLogic(
             stop_loss_rules=[
                 ExitRule("Beyond wick high", "sl",
-                        "wick_high + buffer if side == 'long' else wick_low - buffer", priority=1)
+                        "high + buffer if side == 'long' else low - buffer", priority=1)
             ],
             take_profit_rules=[
                 ExitRule("Mid-range", "tp", "(ny_high + ny_low) / 2", priority=1),
@@ -424,7 +424,7 @@ def get_london_range_trap_spec() -> TradeSpec:
         exit_logic=ExitLogic(
             stop_loss_rules=[
                 ExitRule("Beyond sweep", "sl",
-                        "sweep_high + buffer if side == 'long' else sweep_low - buffer", priority=1)
+                        "high + buffer if side == 'long' else low - buffer", priority=1)
             ],
             take_profit_rules=[
                 ExitRule("Midpoint", "tp", "(london_high + london_low) / 2", priority=1),
@@ -487,7 +487,7 @@ def get_fast_spike_trap_spec() -> TradeSpec:
         exit_logic=ExitLogic(
             stop_loss_rules=[
                 ExitRule("Outside spike", "sl",
-                        "spike_high + buffer if side == 'long' else spike_low - buffer", priority=1)
+                        "high + buffer if side == 'long' else low - buffer", priority=1)
             ],
             take_profit_rules=[
                 ExitRule("Return to VWAP", "tp", "vwap", priority=1),
