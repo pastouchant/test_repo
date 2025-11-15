@@ -16,6 +16,18 @@ from playbook_specs import TradeSpec, EntryCondition
 
 logger = logging.getLogger(__name__)
 
+# Safe built-in functions for eval expressions
+SAFE_BUILTINS = {
+    'abs': abs,
+    'min': min,
+    'max': max,
+    'round': round,
+    'len': len,
+    'sum': sum,
+    'any': any,
+    'all': all,
+}
+
 
 class RulesEngine:
     """
@@ -96,8 +108,8 @@ class RulesEngine:
                 if col in df:
                     eval_context[col] = df[col].iloc[idx]
 
-            # Evaluate expression
-            result = eval(condition.expression, {"__builtins__": {}}, eval_context)
+            # Evaluate expression with safe builtins
+            result = eval(condition.expression, {"__builtins__": SAFE_BUILTINS}, eval_context)
 
             return bool(result)
 
@@ -247,7 +259,7 @@ class RulesEngine:
                 for col in df.columns:
                     eval_context[col] = df[col].iloc[idx]
 
-                if not eval(custom_filter, {"__builtins__": {}}, eval_context):
+                if not eval(custom_filter, {"__builtins__": SAFE_BUILTINS}, eval_context):
                     return False
 
             except Exception as e:
@@ -334,7 +346,7 @@ class RulesEngine:
                 for col in df.columns:
                     eval_context[col] = df[col].iloc[idx]
 
-                stop_loss = eval(sl_rule, {"__builtins__": {}}, eval_context)
+                stop_loss = eval(sl_rule, {"__builtins__": SAFE_BUILTINS}, eval_context)
             except Exception as e:
                 logger.warning(f"Error calculating stop loss: {e}, using default")
 
@@ -353,7 +365,7 @@ class RulesEngine:
                 for col in df.columns:
                     eval_context[col] = df[col].iloc[idx]
 
-                take_profit = eval(tp_rule, {"__builtins__": {}}, eval_context)
+                take_profit = eval(tp_rule, {"__builtins__": SAFE_BUILTINS}, eval_context)
             except Exception as e:
                 logger.warning(f"Error calculating take profit: {e}, using default")
 
