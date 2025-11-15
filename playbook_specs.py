@@ -313,7 +313,7 @@ def get_monday_range_sweep_spec() -> TradeSpec:
         ),
         risk_sizing=RiskSizing(risk_per_trade_pct=1.5, max_leverage=5.0),
         filters=Filters(
-            custom_filters=["is_tuesday or is_wednesday", "monday_range > min_range_size"]
+            custom_filters=["is_tuesday or is_wednesday", "(monday_high - monday_low) > min_range_size"]
         ),
         parameters=[
             Parameter("wick_threshold", 0.6, 0.4, 0.8, 0.05, "Wick size as ratio of candle range"),
@@ -433,7 +433,7 @@ def get_london_range_trap_spec() -> TradeSpec:
         ),
         risk_sizing=RiskSizing(risk_per_trade_pct=1.2, max_leverage=5.0),
         filters=Filters(
-            custom_filters=["london_range > min_range_size"]
+            custom_filters=["(london_high - london_low) > min_range_size"]
         ),
         parameters=[
             Parameter("wick_threshold", 0.6, 0.4, 0.8, 0.05, "Minimum wick ratio"),
