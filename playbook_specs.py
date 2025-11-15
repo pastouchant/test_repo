@@ -222,7 +222,7 @@ def get_small_ib_momentum_spec() -> TradeSpec:
                               "(close > ib_high and side == 'long') or (close < ib_low and side == 'short')",
                               required=True),
                 EntryCondition("Strong delta in breakout direction",
-                              "abs(cvd_delta_5m) > delta_threshold", required=True),
+                              "abs(delta_change_5) > delta_threshold", required=True),
                 EntryCondition("OI increasing",
                               "oi_change_pct > oi_threshold", required=True),
             ],
